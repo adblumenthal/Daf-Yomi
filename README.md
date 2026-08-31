@@ -1,14 +1,66 @@
-# Daf Yomi Tutor — portable Agent Skill
+# Daf — portable Agent Skill
 
-**Version 1.0.0**
+**Version 2.0.0**
 
-A guided Daf Yomi skill that does more than tell you the day's daf: it gives perek/yesterday context, structures the Mishnah and sugyot, explains why the Gemara cares, highlights useful Rashi/Tosafot, connects relevant halacha, teaches Aramaic, gives key takeaways and review questions, previews tomorrow, supports catch-up ranges, learner levels, and masechet siyum planning.
+A source-grounded Talmud tutor with two simple entry points:
+
+- `/daf Chullin 23b` teaches that exact daf or amud, independent of the Daf Yomi schedule.
+- `/daf Chullin 23a-33b` creates a grouped catch-up lesson across that exact inclusive range.
+- `/daf yomi` teaches today's Daf Yomi assignment.
+
+Plain `/daf` is a shortcut for `/daf yomi`. The skill explains the Mishnah and major sugyot, makes the Gemara's logic clear, highlights useful Rashi and Tosafot, connects relevant halacha, teaches Aramaic, gives three key takeaways and review questions, and previews the next material.
 
 ## Dedication
 
 Created by **Adam Blumenthal** in honor of his mother and father, **David and Barbara Blumenthal**, who always pushed him to keep asking questions.
 
-That spirit is part of the goal of this skill: Daf Yomi should not just tell you *what* the Gemara says, but help you keep asking *why*, *how*, and *what follows from it*.
+That spirit is part of the goal of this skill: learning a daf should not stop at *what* the Gemara says, but should keep asking *why*, *how*, and *what follows from it*.
+
+## Command guide
+
+### Study any daf
+
+- `/daf Chullin 23b`
+- `/daf Chullin 23a-33b`
+- `/daf Bava Metzia 42a deep`
+- `/daf Bava Metzia 42a-45b tosafot deep`
+- `/daf Berakhot 2 beginner halacha`
+- `/daf Sanhedrin 17b show sources`
+
+The requested reference is taught directly, even when it is not part of the current Daf Yomi cycle. A reference ending in `a` or `b` limits the lesson to that amud; a reference without an amud letter requests the whole daf when supported by the source.
+
+Exact ranges stay within one masechet and are inclusive. `/daf Chullin 23a-33b` covers every amud from 23a through 33b, groups the material by perek and major sugya, and includes a compact coverage checklist. It does not add unrelated Daf Yomi dates or cycle statistics.
+
+### Follow Daf Yomi
+
+- `/daf`
+- `/daf yomi`
+- `/daf yomi yesterday`
+- `/daf yomi 8/15/2025`
+- `/daf yomi 2025-08-15`
+- `/daf yomi yesterday short`
+- `/daf yomi 8/15/2025 till today short`
+
+Date syntax belongs after `yomi`. Plain `/daf` and `/daf yomi` use the user's current local date.
+
+Yomi mode preserves the original calendar and progress context: current-masechet days remaining, exact completion dates and siyum-planning reminders when close, final-daf notices, and full-cycle progress when reliably available. This material appears only in Yomi mode, not when studying a named page or exact range.
+
+### Study modes
+
+Both exact-daf and Yomi requests support:
+
+- `short` — compact lesson
+- `deep` — expanded shakla v'tarya and commentaries
+- `halacha` — emphasize the path to practical halacha
+- `beginner` — explain terminology and logical steps
+- `advanced` — emphasize Rishonim, conceptual distinctions, and exact references
+- `rashi` — expand the most important Rashi comments and how they shape the peshat
+- `tosafot` / `tosefot` / `tosfos` — expand major questions, answers, parallels, and consequences
+- `show sources` — provide direct source links
+
+Modifiers can be combined for a page, range, or Yomi request, such as `/daf Chullin 23a-33b rashi tosafot advanced`, `/daf Chullin 23b advanced deep`, or `/daf yomi halacha beginner`.
+
+Ordinary requests use a streamlined source path. A `rashi` or `tosafot` modifier selects the most important comments without exhaustively retrieving every commentary passage. Add `deep` or `show sources` when you want broader research and more extensive source verification.
 
 ## Designed for easy installation
 
@@ -27,46 +79,42 @@ Where Skills are available:
 
 1. Open **Plugins → Skills**.
 2. Choose **Create → Upload from your computer**.
-3. Upload the `daf-yomi-tutor` skill folder/package supplied here.
-4. Install/enable the skill.
+3. Upload the complete `Daf` repository folder or release package.
+4. Install or enable the skill.
 
 Availability depends on plan, workspace settings, surface, and rollout.
 
 ## Install in another Agent-Skills-compatible client
 
-Install or copy the entire `daf-yomi-tutor/` directory into the location your client uses for Agent Skills. Keep `SKILL.md`, `scripts/`, and `references/` together.
+Install or copy the complete repository folder into the location your client uses for Agent Skills. Keep `SKILL.md`, `scripts/`, `references/`, and `agents/` together.
 
-The skill follows the open Agent Skills directory format:
-- `SKILL.md` — required instructions/metadata
-- `scripts/` — optional executable helpers
-- `references/` — supporting guidance
+The package follows the open Agent Skills directory format:
 
-## Example prompts
-
-- `/dafyomi`
-- `/dafyomi yesterday`
-- `/dafyomi 8/15/2025`
-- `/dafyomi short`
-- `/dafyomi deep halacha`
-- `/dafyomi beginner short`
-- `/dafyomi advanced deep`
-- `/dafyomi 8/15/2025 till today short`
+- `SKILL.md` — required instructions and trigger metadata
+- `agents/openai.yaml` — optional UI metadata
+- `scripts/` — zero-dependency source and calendar helpers
+- `references/` — supporting source and installation guidance
+- `tests/` — release acceptance coverage
 
 ## Data sources
 
-- **Hebcal**: Daf Yomi assignment, Hebrew dates, and Jewish-calendar context.
-- **Sefaria**: primary Jewish texts and commentaries for source verification.
+- **Hebcal**: Daf Yomi assignments, Hebrew dates, and Jewish-calendar context for Yomi mode.
+- **Sefaria**: primary Jewish texts and commentaries for both exact-daf and Yomi modes.
 
-These services are called at runtime; their text/data is not bundled into this repository.
+These services are called at runtime; their text and data are not bundled into this repository.
+
+## Quality checks
+
+Run:
+
+```bash
+python scripts/self_check.py
+```
+
+Then review `tests/acceptance-cases.md`. It covers exact-daf routing, exact ranges, Daf Yomi dates and ranges, Rashi/Tosafot focus, study modes, Yomi-only completion context, source behavior, and special days.
 
 ## Publishing
 
 This project is released under the **MIT License**. See `LICENSE`.
 
-The canonical portable skill is the `daf-yomi-tutor/` folder. Vendor-specific wrappers should point to or package this folder rather than fork the teaching instructions.
-
-## Quality checks
-
-Before a release, review `tests/acceptance-cases.md`. It contains representative prompts for date handling, catch-up ranges, siyum planning, special days, learner modes, source links, and source-failure behavior.
-
-See `CHANGELOG.md` for release history.
+See `CHANGELOG.md` for release history and the 2.0 command migration notes.

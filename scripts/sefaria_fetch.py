@@ -21,25 +21,34 @@ import urllib.request
 BASE = "https://www.sefaria.org/api/v3/texts/"
 PAGE_BASE = "https://www.sefaria.org/"
 
+
+def build_urls(ref: str, version: str = "primary") -> tuple[str, str]:
+    """Build API and human-readable URLs without changing the requested scope."""
+    tref_api = urllib.parse.quote(ref, safe="")
+    tref_page = urllib.parse.quote(ref.replace(" ", "_"), safe="_:.:-")
+    query = urllib.parse.urlencode({
+        "version": version,
+        "fill_in_missing_segments": "1",
+        "return_format": "text_only",
+    })
+    return BASE + tref_api + "?" + query, PAGE_BASE + tref_page
+
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8")
+
     p = argparse.ArgumentParser()
     p.add_argument("ref", help='Sefaria ref, e.g. "Chullin 118a"')
     p.add_argument("--version", default="primary", help='Sefaria version selector; default "primary"')
     args = p.parse_args()
 
-    tref_api = urllib.parse.quote(args.ref, safe="")
-    tref_page = urllib.parse.quote(args.ref.replace(" ", "_"), safe="_:.")
-    query = urllib.parse.urlencode({
-        "version": args.version,
-        "fill_in_missing_segments": "1",
-        "return_format": "text_only",
-    })
-    url = BASE + tref_api + "?" + query
-    source_url = PAGE_BASE + tref_page
+    url, source_url = build_urls(args.ref, args.version)
 
     req = urllib.request.Request(
         url,
-        headers={"User-Agent": "daf-yomi-tutor/1.0 (+Agent Skills)"}
+        headers={"User-Agent": "daf/2.0 (+Agent Skills)"}
     )
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:

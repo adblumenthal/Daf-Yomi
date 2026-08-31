@@ -5,8 +5,11 @@ Zero-dependency Daf Yomi calendar helper.
 Uses Hebcal's public API. No API key is required.
 
 Examples:
-  python daf-yomi-tutor/scripts/dafyomi_context.py --date 2026-08-30
-  python daf-yomi-tutor/scripts/dafyomi_context.py --date 2026-08-15 --through 2026-08-30
+  python scripts/yomi_context.py --date 2026-08-30
+  python scripts/yomi_context.py --date 2026-08-15 --through 2026-08-30
+
+This helper is for /daf yomi calendar resolution. Exact-daf requests go
+directly to Sefaria and do not depend on the daily cycle.
 """
 
 # Created by Adam Blumenthal in honor of David and Barbara Blumenthal,
@@ -27,7 +30,7 @@ HEBCAL = "https://www.hebcal.com/hebcal"
 def _get_json(url: str) -> dict:
     req = urllib.request.Request(
         url,
-        headers={"User-Agent": "daf-yomi-tutor/1.0 (+Agent Skills)"}
+        headers={"User-Agent": "daf/2.0 (+Agent Skills)"}
     )
     with urllib.request.urlopen(req, timeout=20) as resp:
         return json.load(resp)
@@ -80,8 +83,12 @@ def _calendar_items(items: list[dict]) -> list[dict]:
         if i.get("category") not in {"dafyomi", "hebdate"}
     ]
 
-def _find_masechet_finish(start: dt.date, current_tractate: str) -> tuple[dt.date | None, int | None]:
-    # Longest Bavli tractates fit comfortably inside this window.
+
+def _find_masechet_finish(
+    start: dt.date,
+    current_tractate: str,
+) -> tuple[dt.date | None, int | None]:
+    """Find the final daily assignment in the current masechet."""
     horizon = start + dt.timedelta(days=220)
     payload = _hebcal(start, horizon, daf=True, calendar=False)
     by_date = _items_by_date(payload)
@@ -128,6 +135,11 @@ def _record(day: dt.date, items: list[dict]) -> dict:
     }
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8")
+
     p = argparse.ArgumentParser()
     p.add_argument("--date", required=True, help="Start date YYYY-MM-DD")
     p.add_argument("--through", help="Inclusive end date YYYY-MM-DD")
@@ -157,7 +169,6 @@ def main() -> int:
         "attribution": "Calendar and Daf Yomi assignment data: Hebcal.com",
     }
 
-    # Masechet finish planning is keyed to the first requested day.
     first = records[0] if records else None
     if first and first.get("tractate"):
         finish, remaining = _find_masechet_finish(start, first["tractate"])
@@ -166,6 +177,8 @@ def main() -> int:
             "days_remaining_after_requested_daf": remaining,
             "finish_date": finish.isoformat() if finish else None,
             "within_14_days": bool(remaining is not None and remaining <= 14),
+            "within_7_days": bool(remaining is not None and remaining <= 7),
+            "within_3_days": bool(remaining is not None and remaining <= 3),
             "siyum_day": remaining == 0,
         }
 

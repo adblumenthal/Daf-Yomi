@@ -1,0 +1,4 @@
+interface:
+  display_name: "Daf"
+  short_description: "Study any daf, range, or today's Daf Yomi"
+  default_prompt: "Use $daf to summarize Chullin 23a-33b with extra Tosafot depth."
